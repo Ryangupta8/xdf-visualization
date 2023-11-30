@@ -18,7 +18,7 @@ In this case the example is the spot_state from a test xdf file.
 This is how we want to plot the biosignal data plots.
 ``` 
 cd xdf-visualization
-python test_simple_animation.py
+python test/test_simple_animation.py
 ```
 
 
@@ -27,15 +27,23 @@ This script animates the same robot state, but does so as position and otientati
 This is how we want to visualize the robot state, however we need both of them.
 ``` 
 cd xdf-visualization
-python test_robotstate_animation.py
+python test/test_robotstate_animation.py
 ```
 
-### 2. test_createstreams
+### 3. test_robotstate_animation
+This script animates the same robot state, but does so as position and otientation of the robot over the map.
+This is how we want to visualize the robot state, however we need both of them.
+``` 
+cd xdf-visualization
+python test/test_robotstate_animation.py
+```
+
+### 4. test_createstreams
 This script is the first attempt to generate stream data for HS
 Namely: 1) robots line of sight; 2) robots moving; 3) robots nearby 
 ``` 
 cd xdf-visualization
-python test_createstreams.py
+python test/test_createstreams.py
 ```
 
 
