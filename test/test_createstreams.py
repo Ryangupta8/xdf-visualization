@@ -14,6 +14,91 @@ import math
 sys.path.append('data')
 sys.path.append('map')
 
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+ 
+class line:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+ 
+def onLine(l1, p):
+    # Check whether p is on the line or not
+    if (
+        p.x <= max(l1.p1.x, l1.p2.x)
+        and p.x >= min(l1.p1.x, l1.p2.x)
+        and (p.y <= max(l1.p1.y, l1.p2.y) and p.y >= min(l1.p1.y, l1.p2.y))
+    ):
+        return True
+    return False
+ 
+def direction(a, b, c):
+    val = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y)
+    if val == 0:
+        # Collinear
+        return 0
+    elif val < 0:
+        # Anti-clockwise direction
+        return 2
+    # Clockwise direction
+    return 1
+ 
+def isIntersect(l1, l2):
+    # Four direction for two lines and points of other line
+    dir1 = direction(l1.p1, l1.p2, l2.p1)
+    dir2 = direction(l1.p1, l1.p2, l2.p2)
+    dir3 = direction(l2.p1, l2.p2, l1.p1)
+    dir4 = direction(l2.p1, l2.p2, l1.p2)
+ 
+    # When intersecting
+    if dir1 != dir2 and dir3 != dir4:
+        return True
+ 
+    # When p2 of line2 are on the line1
+    if dir1 == 0 and onLine(l1, l2.p1):
+        return True
+ 
+    # When p1 of line2 are on the line1
+    if dir2 == 0 and onLine(l1, l2.p2):
+        return True
+ 
+    # When p2 of line1 are on the line2
+    if dir3 == 0 and onLine(l2, l1.p1):
+        return True
+ 
+    # When p1 of line1 are on the line2
+    if dir4 == 0 and onLine(l2, l1.p2):
+        return True
+ 
+    return False
+ 
+def checkInside(poly, n, p):
+    # When polygon has less than 3 edge, it is not polygon
+    if n < 3:
+        return False
+ 
+    # Create a point at infinity, y is same as point p
+    exline = line(p, Point(9999, p.y))
+    count = 0
+    i = 0
+    while True:
+        # Forming a line from two consecutive points of poly
+        side = line(poly[i], poly[(i + 1) % n])
+        if isIntersect(side, exline):
+            # If side is intersects ex
+            if (direction(side.p1, p, side.p2) == 0):
+                return onLine(side, p)
+            count += 1
+         
+        i = (i + 1) % n
+        if i == 0:
+            break
+ 
+    # When count is odd
+    return count & 1
+
 def rot(x):
     # r = np.array([[-1,0],[0,-1]])
     r = np.array([[1,0],[0,1]])
@@ -63,7 +148,7 @@ def update(frame):
     m = MarkerStyle(TextPath((0, -3.1), ">"), transform=t)
     scat3.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
-    ## 
+    ## update robots moving plots
     line1.set_xdata(spot_stream['time_stamps'][:frame])
     line1.set_ydata(spot_moving[:frame])
     sub2.set_ylim(bottom=-0.5, top=1.5)
@@ -71,9 +156,19 @@ def update(frame):
     line2.set_ydata(go1_moving[:frame])
     sub3.set_ylim(bottom=-0.5, top=1.5)
 
-    
+    ## update robots los plots
+    line3.set_xdata(spot_stream['time_stamps'][:frame])
+    line3.set_ydata(spot_subj1_los[:frame])
+    line4.set_xdata(spot_stream['time_stamps'][:frame])
+    line4.set_ydata(spot_subj2_los[:frame])
+    sub4.set_ylim(bottom=-0.5, top=1.5)
 
-    
+    line5.set_xdata(go1_stream['time_stamps'][:frame])
+    line5.set_ydata(go1_subj1_los[:frame])
+    line6.set_xdata(go1_stream['time_stamps'][:frame])
+    line6.set_ydata(go1_subj2_los[:frame])
+    sub5.set_ylim(bottom=-0.5, top=1.5)
+     
     return (scat1) # (line1, line2, line3, line4, line5, line6)
 
 ## Load the xdf file
@@ -96,13 +191,13 @@ sub3.set_xticks([])
 # sub3.set_yticks([])
 sub3.set_title("Go1 Moving Boolean")
 sub4 = plt.subplot(4,2,7)
-sub4.set_title("Participant 1 SCG Signals")
+sub4.set_title("Spot in Line of Sight of Participants")
 sub4.set_xticks([])
-sub4.set_yticks([])
+# sub4.set_yticks([])
 sub5 = plt.subplot(4,2,8)
-sub5.set_title("Participant 2 SCG Signals")
+sub5.set_title("Go1 in Line of Sight of Participants")
 sub5.set_xticks([])
-sub5.set_yticks([])
+# sub5.set_yticks([])
 
 
 plot_vectormap(vectormap_txt, fig, sub1)
@@ -227,11 +322,56 @@ for i in range(go1_series.shape[0]-20):
         go1_moving[i+20] = 1
 
 ## Determine if robot is in line of sight
+spot_subj1_los = np.zeros(spot_series.shape[0])
+spot_subj2_los = np.zeros(spot_series.shape[0])
+go1_subj1_los = np.zeros(go1_series.shape[0])
+go1_subj2_los = np.zeros(go1_series.shape[0])
+
+# Points of the polygon
+polygon_livroom = [ Point(0,3), Point(0,6), Point(14,6), Point(10,3),  Point(5,3)]
+polygon_smallroom = [  Point(9,1), Point(12,0), Point(13,0), Point(14,7)]
+
+if 'social' in xdf_file:
+    for i in range(spot_series.shape[0]):
+        p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            spot_subj1_los[i] = 1
+            spot_subj2_los[i] = 1
+    for i in range(go1_series.shape[0]):
+        p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            go1_subj1_los[i] = 1
+            go1_subj2_los[i] = 1
+else:
+    for i in range(spot_series.shape[0]):
+        p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            spot_subj1_los[i] = 1
+        n = 4
+        if(checkInside(polygon_smallroom, n, p)):
+            spot_subj2_los[i] = 1
+    for i in range(go1_series.shape[0]):
+        p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            go1_subj1_los[i] = 1
+        n = 4
+        if(checkInside(polygon_smallroom, n, p)):
+            go1_subj2_los[i] = 1
+
 
 
 
 line1 = sub2.plot(spot_stream['time_stamps'], spot_moving[:])[0]
 line2 = sub3.plot(go1_stream['time_stamps'], go1_moving[:])[0]
+line3 = sub4.plot(spot_stream['time_stamps'], spot_subj1_los[:])[0]
+line4 = sub4.plot(spot_stream['time_stamps'], spot_subj2_los[:])[0]
+line5 = sub5.plot(go1_stream['time_stamps'], go1_subj1_los[:])[0]
+line6 = sub5.plot(go1_stream['time_stamps'], go1_subj2_los[:])[0]
+
 ## Plot animation
 ani = animation.FuncAnimation(fig=fig, func=update, interval=1) ## interval=1 speeds up the animation
 plt.show()
