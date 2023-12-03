@@ -39,8 +39,15 @@ python test/test_robotstate_animation.py
 ```
 
 ### 4. test_createstreams
-This script is the first attempt to generate stream data for HS
+This script is the first attempt to generate stream data and visualizes it with the robots moving 
 Namely: 1) robots line of sight; 2) robots moving; 3) robots nearby 
+``` 
+cd xdf-visualization
+python test/test_createstreams.py
+```
+
+### 5. animation.py
+The first version of the completed animation. Plots the robots moving at the top with synchronized ECG and SCG data on the plots below.
 ``` 
 cd xdf-visualization
 python test/test_createstreams.py
