@@ -43,80 +43,116 @@ def plot_vectormap(fname,figure,axes,facecolor="white",linecolor="black"):
 
 ## Update function for the matplotlib animation
 def update(frame):
-    # update the scatter plot:
-    data = np.stack([y1[frame,0], y1[frame,1]]).T
+    # update the spot state plots:
+    data = np.stack([spot_series[frame,0], spot_series[frame,1]]).T
     scat1.set_offsets(data)
-    data = np.stack([y1[:frame,0], y1[:frame,1]]).T
+    data = np.stack([spot_series[:frame,0], spot_series[:frame,1]]).T
     scat2.set_offsets(data)
-    yaw_ = math.atan2(2.0 * (y1[frame,5] * y1[frame,4]), y1[frame,5] * y1[frame,5] - y1[frame,4] * y1[frame,4])
+    yaw_ = math.atan2(2.0 * (spot_series[frame,5] * spot_series[frame,4]), spot_series[frame,5] * spot_series[frame,5] - spot_series[frame,4] * spot_series[frame,4])
     t = Affine2D().scale(7).rotate_deg(np.rad2deg(yaw_))
     m = MarkerStyle(TextPath((0, -3.1), ">"), transform=t)
     scat1.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
-    # update the scatter plot:
-    data = np.stack([y2[frame,0], y2[frame,1]]).T
+    # update go1 state plots:
+    data = np.stack([go1_series[frame,0], go1_series[frame,1]]).T
     scat3.set_offsets(data)
-    data = np.stack([y2[:frame,0], y2[:frame,1]]).T
+    data = np.stack([go1_series[:frame,0], go1_series[:frame,1]]).T
     scat4.set_offsets(data)
-    yaw_ = math.atan2(2.0 * (y2[frame,5] * y2[frame,4]), y2[frame,5] * y2[frame,5] - y2[frame,4] * y2[frame,4])
+    yaw_ = math.atan2(2.0 * (go1_series[frame,5] * go1_series[frame,4]), go1_series[frame,5] * go1_series[frame,5] - go1_series[frame,4] * go1_series[frame,4])
     t = Affine2D().scale(7).rotate_deg(np.rad2deg(yaw_))
     m = MarkerStyle(TextPath((0, -3.1), ">"), transform=t)
     scat3.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     
-    # print("ecg_srate: ",ecg_srate)
-    # print("state_srate: ",state_srate)
-    # print("ecg_srate/state_srate: ",ecg_srate/state_srate)
-    # update the line plot:
-    line1.set_xdata(stream3['time_stamps'][:int(frame*ecg_srate/state_srate)])
-    line1.set_ydata(y3[:int(frame*ecg_srate/state_srate)])
-    # print("stream3['time_stamps'][frame] = ",stream3['time_stamps'][frame])
-    # print("y3[frame] = ",y3[frame][0])
-    data = np.stack([stream3['time_stamps'][int(frame*ecg_srate/state_srate)], y3[int(frame*ecg_srate/state_srate)][0]]).T
+    
+    # update the ecgd4 plot:
+    line1.set_xdata(ecgd4_stream['time_stamps'][:int(frame*ecg_srate/state_srate)])
+    line1.set_ydata(ecgd4_series[:int(frame*ecg_srate/state_srate)])
+    # print("ecgd4_stream['time_stamps'][frame] = ",ecgd4_stream['time_stamps'][frame])
+    # print("ecgd4_series[frame] = ",ecgd4_series[frame][0])
+    data = np.stack([ecgd4_stream['time_stamps'][int(frame*ecg_srate/state_srate)], ecgd4_series[int(frame*ecg_srate/state_srate)][0]]).T
     scat5.set_offsets(data)
-    sub2.set_xlim(stream3['time_stamps'][0], stream3['time_stamps'][0] + frame / 14.5)
+    sub2.set_xlim(ecgd4_stream['time_stamps'][0], ecgd4_stream['time_stamps'][0] + frame / 14.5)
 
-    # # update the line plot:
-    line2.set_xdata(stream4['time_stamps'][:int(frame*ecg_srate/state_srate)])
-    line2.set_ydata(y4[:int(frame*ecg_srate/state_srate)])
-    data = np.stack([stream4['time_stamps'][int(frame*ecg_srate/state_srate)], y4[int(frame*ecg_srate/state_srate)][0]]).T
+    # update the ecgfa plot:
+    line2.set_xdata(ecgfa_stream['time_stamps'][:int(frame*ecg_srate/state_srate)])
+    line2.set_ydata(ecgfa_series[:int(frame*ecg_srate/state_srate)])
+    data = np.stack([ecgfa_stream['time_stamps'][int(frame*ecg_srate/state_srate)], ecgfa_series[int(frame*ecg_srate/state_srate)][0]]).T
     scat6.set_offsets(data)
-    sub3.set_xlim(stream4['time_stamps'][0], stream4['time_stamps'][0] + frame / 14.5)
+    sub3.set_xlim(ecgfa_stream['time_stamps'][0], ecgfa_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgxd4 plot:
+    line3.set_xdata(scgxd4_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line3.set_ydata(scgxd4_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgxd4_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgxd4_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat7.set_offsets(data)
+    sub4.set_xlim(scgxd4_stream['time_stamps'][0], scgxd4_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgyd4 plot:
+    line4.set_xdata(scgyd4_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line4.set_ydata(scgyd4_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgyd4_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgyd4_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat8.set_offsets(data)
+    sub4.set_xlim(scgyd4_stream['time_stamps'][0], scgyd4_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgzd4 plot:
+    line5.set_xdata(scgzd4_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line5.set_ydata(scgzd4_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgzd4_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgzd4_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat9.set_offsets(data)
+    sub4.set_xlim(scgzd4_stream['time_stamps'][0], scgzd4_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgxfa plot:
+    line6.set_xdata(scgxfa_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line6.set_ydata(scgxfa_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgxfa_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgxfa_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat10.set_offsets(data)
+    sub5.set_xlim(scgxfa_stream['time_stamps'][0], scgxfa_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgyd4 plot:
+    line7.set_xdata(scgyfa_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line7.set_ydata(scgyfa_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgyfa_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgyfa_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat11.set_offsets(data)
+    sub5.set_xlim(scgyfa_stream['time_stamps'][0], scgyfa_stream['time_stamps'][0] + frame / 14.5)
+
+    # update the scgzd4 plot:
+    line8.set_xdata(scgzfa_stream['time_stamps'][:int(frame*scg_srate/state_srate)])
+    line8.set_ydata(scgzfa_series[:int(frame*scg_srate/state_srate)])
+    data = np.stack([scgzfa_stream['time_stamps'][int(frame*scg_srate/state_srate)], scgzfa_series[int(frame*scg_srate/state_srate)][0]]).T
+    scat12.set_offsets(data)
+    sub5.set_xlim(scgzfa_stream['time_stamps'][0], scgzfa_stream['time_stamps'][0] + frame / 14.5)
+
     
     return (scat1) # (line1, line2, line3, line4, line5, line6)
 
-xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
-# xdf_file = 'session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
 ## Load the xdf file
+# xdf_file = 'session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
+xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
 data, header = pyxdf.load_xdf('data/' + xdf_file)
 
-## Create the figures
-fig = plt.figure(figsize=(20,20))
+## Create the figure
+fig = plt.figure(figsize=(4,6))
 fig.subplots_adjust(bottom=0.015, left=0.015, top = 0.985, right=0.985)
-# sub1 = plt.subplot(1,2,1)
-# sub2 = plt.subplot(3,2,5)
-# sub3 = plt.subplot(3,2,6)
-# sub4 = plt.subplot(3,2,7)
-# sub5 = plt.subplot(3,2,8)
-##
+
+## Arrange subplots
 sub1 = plt.subplot(2,1,1)
 sub2 = plt.subplot(4,2,5)
 sub2.set_xticks([])
 sub2.set_yticks([])
+sub2.set_title("Participant 1 ECG Signal")
 sub3 = plt.subplot(4,2,6)
 sub3.set_xticks([])
 sub3.set_yticks([])
+sub3.set_title("Participant 2 ECG Signal")
 sub4 = plt.subplot(4,2,7)
+sub4.set_title("Participant 1 SCG Signals")
 sub4.set_xticks([])
 sub4.set_yticks([])
 sub5 = plt.subplot(4,2,8)
+sub5.set_title("Participant 2 SCG Signals")
 sub5.set_xticks([])
 sub5.set_yticks([])
 
-# X = [ (1,2,1), (3,2,2), (3,2,4), (3,2,6) ]
-# for nrows, ncols, plot_number in X:
-#     plt.subplot(nrows, ncols, plot_number)
-#     plt.xticks([])
-#     plt.yticks([])
 
 plot_vectormap(vectormap_txt, fig, sub1)
 
@@ -136,6 +172,8 @@ else:
 
 ## loop thru all of the separate streams (e.g. go1_state; spot_state; etc.)
 for stream in data:
+
+    # print("stream name: ", stream['info']['name'])
     
     y = stream['time_series']
     # print("stream['time_stamps'].shape = ", stream['time_stamps'].shape)
@@ -155,21 +193,23 @@ for stream in data:
             ## effective rate
             print("Actual sample rate: ",stream['info']['effective_srate'])
             state_srate = float(stream['info']['effective_srate'])
+            ## spot/go1_state shape is (n_timesteps,6), i think EDA/ECG maybe similar? 
+            print("y.shape = ",spot_series.shape) 
             print('-----------------------')
             ## The actual data points
-            y1 = stream['time_series']
-            ## spot/go1_state shape is (n_timesteps,6), i think EDA/ECG maybe similar? 
-            print("y.shape = ",y1.shape) 
+            spot_series = stream['time_series']
+            
 
-            _yaw = math.atan2(2.0 * (y1[0,5] * y1[0,4]), y1[0,5] * y1[0,5] - y1[0,4] * y1[0,4])
+            _yaw = math.atan2(2.0 * (spot_series[0,5] * spot_series[0,4]), spot_series[0,5] * spot_series[0,5] - spot_series[0,4] * spot_series[0,4])
             # print("yaw = ", _yaw)
             # print("np.rad2deg(_yaw) = ",np.rad2deg(_yaw))
             t = Affine2D().scale(7).rotate_deg(np.rad2deg(_yaw))
             m = MarkerStyle(TextPath((0, 0), ">"), transform=t)
             ## For plotting the oriented robot position
-            scat1 = sub1.scatter(y1[0,0], y1[0,1], c='#0000FF', marker=m)
+            scat1 = sub1.scatter(spot_series[0,0], spot_series[0,1], c='#0000FF', marker=m)
             ## For plotting the full robot path as it moves
-            scat2 = sub1.scatter(y1[0,0], y1[0,1], c='#0000FF', marker=".")
+            scat2 = sub1.scatter(spot_series[0,0], spot_series[0,1], c='#0000FF', marker=".", label='Spot')
+            sub1.legend(labelcolor='linecolor', loc='lower left')
             
 
 
@@ -185,17 +225,17 @@ for stream in data:
             print('-----------------------')
 
             ## The actual data points
-            y2 = stream['time_series']
+            go1_series = stream['time_series']
 
-            _yaw = math.atan2(2.0 * (y2[0,5] * y2[0,4]), y2[0,5] * y2[0,5] - y2[0,4] * y2[0,4])
+            _yaw = math.atan2(2.0 * (go1_series[0,5] * go1_series[0,4]), go1_series[0,5] * go1_series[0,5] - go1_series[0,4] * go1_series[0,4])
             # print("yaw = ", _yaw)
             # print("np.rad2deg(_yaw) = ",np.rad2deg(_yaw))
             t = Affine2D().scale(7).rotate_deg(np.rad2deg(_yaw))
             m = MarkerStyle(TextPath((0, 0), ">"), transform=t)
             ## For plotting the oriented robot position
-            scat3 = sub1.scatter(y2[0,0], y2[0,1], c='#FF0000', marker=m)
+            scat3 = sub1.scatter(go1_series[0,0], go1_series[0,1], c='#FF0000', marker=m)
             ## For plotting the full robot path as it moves
-            scat4 = sub1.scatter(y2[0,0], y2[0,1], c='#FF0000', marker=".")
+            scat4 = sub1.scatter(go1_series[0,0], go1_series[0,1], c='#FF0000', marker=".", label='Go1')
 
         
         if ("ECG-D4" in str(stream['info']['name'])) and (y.shape[0] > 1):
@@ -206,16 +246,70 @@ for stream in data:
             ## Stream dtype
             print("stream channel format: ", stream['info']['channel_format'])
             
-            y3 = stream['time_series']
-            print("y3.shape = ",y3.shape)
+            ecgd4_series = stream['time_series']
+            print("ecgd4_series.shape = ",ecgd4_series.shape)
             ## effective rate
             print("Actual sample rate: ",stream['info']['effective_srate'])
             ecg_srate = float(stream['info']['effective_srate'])
             print('-----------------------')
 
-            line1 = sub2.plot(stream['time_stamps'], y3[:], color="green")[0]
-            scat5 = sub2.scatter(stream['time_stamps'][0], y3[0], c='orange')
-            stream3 = stream
+            line1 = sub2.plot(stream['time_stamps'], ecgd4_series[:], color="green")[0]
+            scat5 = sub2.scatter(stream['time_stamps'][0], ecgd4_series[0], c='orange')
+            ecgd4_stream = stream
+
+        if ("SCGX-D4" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgxd4_series = stream['time_series']
+            print("scgxd4_series.shape = ",scgxd4_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            scg_srate = float(stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line3 = sub4.plot(stream['time_stamps'], scgxd4_series[:])[0]
+            scat7 = sub4.scatter(stream['time_stamps'][0], scgxd4_series[0], c='orange')
+            scgxd4_stream = stream
+            sub4.legend(labelcolor='linecolor')
+
+        if ("SCGY-D4" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgyd4_series = stream['time_series']
+            print("scgyd4_series.shape = ",scgyd4_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line4 = sub4.plot(stream['time_stamps'], scgyd4_series[:])[0]
+            scat8 = sub4.scatter(stream['time_stamps'][0], scgyd4_series[0], c='orange')
+            scgyd4_stream = stream
+
+        if ("SCGZ-D4" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgzd4_series = stream['time_series']
+            print("scgzd4_series.shape = ",scgzd4_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line5 = sub4.plot(stream['time_stamps'], scgzd4_series[:])[0]
+            scat9 = sub4.scatter(stream['time_stamps'][0], scgzd4_series[0], c='orange')
+            scgzd4_stream = stream
+
 
         if ("ECG-FA" in str(stream['info']['name'])) and (y.shape[0] > 1):
             ## Stream name
@@ -224,15 +318,68 @@ for stream in data:
             print("stream type: ", stream['info']['type'])
             ## Stream dtype
             print("stream channel format: ", stream['info']['channel_format'])
-            y4 = stream['time_series']
-            print("y4.shape = ",y4.shape)
+            ecgfa_series = stream['time_series']
+            print("ecgfa_series.shape = ",ecgfa_series.shape)
             ## effective rate
             print("Actual sample rate: ",stream['info']['effective_srate'])
             print('-----------------------')
 
-            line2 = sub3.plot(stream['time_stamps'], y4[:], color="green")[0]
-            scat6 = sub3.scatter(stream['time_stamps'][0], y4[0], c='orange')
-            stream4 = stream
+            line2 = sub3.plot(stream['time_stamps'], ecgfa_series[:], color="green")[0]
+            scat6 = sub3.scatter(stream['time_stamps'][0], ecgfa_series[0], c='orange')
+            ecgfa_stream = stream
+        
+        if ("SCGX-FA" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgxfa_series = stream['time_series']
+            print("scgxfa_series.shape = ",scgxfa_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line6 = sub5.plot(stream['time_stamps'], scgxfa_series[:])[0]
+            scat10 = sub5.scatter(stream['time_stamps'][0], scgxfa_series[0], c='orange')
+            scgxfa_stream = stream
+            sub5.legend(labelcolor='linecolor', loc="right")
+
+        if ("SCGY-FA" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgyfa_series = stream['time_series']
+            print("scgyfa_series.shape = ",scgyfa_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line7 = sub5.plot(stream['time_stamps'], scgyfa_series[:])[0]
+            scat11 = sub5.scatter(stream['time_stamps'][0], scgyfa_series[0], c='orange')
+            scgyfa_stream = stream
+
+        if ("SCGZ-FA" in str(stream['info']['name'])) and (y.shape[0] > 1):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            scgzfa_series = stream['time_series']
+            print("scgzfa_series.shape = ",scgzfa_series.shape)
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            print('-----------------------')
+
+            line8 = sub5.plot(stream['time_stamps'], scgzfa_series[:])[0]
+            scat12 = sub5.scatter(stream['time_stamps'][0], scgzfa_series[0], c='orange')
+            scgzfa_stream = stream
+
 
     else:
         raise RuntimeError('Unknown stream format')
