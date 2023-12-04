@@ -172,8 +172,8 @@ def update(frame):
     return (scat1) # (line1, line2, line3, line4, line5, line6)
 
 ## Load the xdf file
-# xdf_file = 'session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
-xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
+xdf_file = 'session1/session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
+# xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
 data, header = pyxdf.load_xdf('data/' + xdf_file)
 
 ## Create the figure

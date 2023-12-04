@@ -122,6 +122,19 @@ def update(frame):
     scat12.set_offsets(data)
     sub5.set_xlim(scgzfa_stream['time_stamps'][0], scgzfa_stream['time_stamps'][0] + frame / 14.5)
 
+    # update the audio signal smallroom
+    data = np.stack([9.2, 1.5]).T
+    scat14.set_offsets(data)
+    t = Affine2D().scale(800*smallroom_series[int(frame*smallroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+    scat14.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+    # update the audio signal livroom
+    data = np.stack([4.25, 3.15]).T
+    scat13.set_offsets(data)
+    t = Affine2D().scale(1600*livroom_series[int(frame*livroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+    scat13.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     
     return (scat1) # (line1, line2, line3, line4, line5, line6)
 
@@ -194,7 +207,7 @@ for stream in data:
             print("Actual sample rate: ",stream['info']['effective_srate'])
             state_srate = float(stream['info']['effective_srate'])
             ## spot/go1_state shape is (n_timesteps,6), i think EDA/ECG maybe similar? 
-            print("y.shape = ",spot_series.shape) 
+            # print("y.shape = ",spot_series.shape) 
             print('-----------------------')
             ## The actual data points
             spot_series = stream['time_series']
@@ -209,7 +222,6 @@ for stream in data:
             scat1 = sub1.scatter(spot_series[0,0], spot_series[0,1], c='#0000FF', marker=m)
             ## For plotting the full robot path as it moves
             scat2 = sub1.scatter(spot_series[0,0], spot_series[0,1], c='#0000FF', marker=".", label='Spot')
-            sub1.legend(labelcolor='linecolor', loc='lower left')
             
 
 
@@ -380,10 +392,54 @@ for stream in data:
             scat12 = sub5.scatter(stream['time_stamps'][0], scgzfa_series[0], c='orange')
             scgzfa_stream = stream
 
+        if "mic-livroom" in str(stream['info']['name']):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            livroom_srate = float(stream['info']['effective_srate'])
+
+            ## The actual data points
+            livroom_series = stream['time_series']
+            print('livroom_series.shape = ', livroom_series.shape)
+            print('-----------------------')
+
+            t = Affine2D().scale(livroom_series[0])
+            m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+            ## For plotting the audio signal strength
+            scat13 = sub1.scatter(4.78, 3.23, marker=m, label='Microphone Living Room')
+
+        if "mic-smallroom" in str(stream['info']['name']):
+            ## Stream name
+            print("stream name: ", stream['info']['name'])
+            ## ex: spot/go1_state type = xy_rxryrzrw
+            print("stream type: ", stream['info']['type'])
+            ## Stream dtype
+            print("stream channel format: ", stream['info']['channel_format'])
+            ## effective rate
+            print("Actual sample rate: ",stream['info']['effective_srate'])
+            smallroom_srate = float(stream['info']['effective_srate'])
+
+            ## The actual data points
+            smallroom_series = stream['time_series']
+            print('livroom_series.shape = ', smallroom_series.shape)
+            print('-----------------------')
+
+            t = Affine2D().scale(smallroom_series[0])
+            m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+            ## For plotting the audio signal strength
+            scat14 = sub1.scatter(9.7, 1.77, marker=m, label='Microphone Small Room')
+            
+
 
     else:
         raise RuntimeError('Unknown stream format')
 
+sub1.legend(labelcolor='linecolor', loc='upper left')
 ani = animation.FuncAnimation(fig=fig, func=update, interval=1) ## interval=1 speeds up the animation
 plt.show()
 
