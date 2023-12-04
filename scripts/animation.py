@@ -10,6 +10,7 @@ import numpy as np
 import sys
 import os
 import math
+import getch
 
 sys.path.append('data')
 sys.path.append('map')
@@ -210,19 +211,19 @@ def update(frame):
     sub5.set_xlim(scgzfa_stream['time_stamps'][0], scgzfa_stream['time_stamps'][0] + frame / 14.5)
 
     # update the audio signal smallroom
-    data = np.stack([9.45, 1.6]).T
+    data = np.stack([9.45, 1.65]).T
     scat14.set_offsets(data)
-    t = Affine2D().scale(400*smallroom_series[int(frame*smallroom_srate/state_srate)])
-    m = MarkerStyle(TextPath((-int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2), -int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2)), "o"), transform=t)
+    t = Affine2D().scale(250*smallroom_series[int(frame*smallroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((-int((250*smallroom_series[int(frame*smallroom_srate/state_srate)])/2), -int((250*smallroom_series[int(frame*smallroom_srate/state_srate)])/2)), "o"), transform=t)
     scat14.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
     # update the audio signal livroom
-    data = np.stack([4.775, 3.15]).T
+    data = np.stack([4.75, 3.15]).T
     scat13.set_offsets(data)
-    t = Affine2D().scale(400*livroom_series[int(frame*livroom_srate/state_srate)])
-    m = MarkerStyle(TextPath((-int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2), -int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2)), "o"), transform=t)
+    t = Affine2D().scale(425*livroom_series[int(frame*livroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((-int((425*livroom_series[int(frame*livroom_srate/state_srate)])/2), -int((425*livroom_series[int(frame*livroom_srate/state_srate)])/2)), "o"), transform=t)
     scat13.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
-
+    
     if spot_subj1_los[frame]:
         t = Affine2D().scale(4)
         m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
@@ -231,14 +232,6 @@ def update(frame):
         m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
     scat15.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     
-    if spot_subj2_los[frame]:
-        t = Affine2D().scale(4)
-        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
-    else:
-        t = Affine2D().scale(0)
-        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
-    scat16.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
-
     if go1_subj1_los[frame]:
         t = Affine2D().scale(4)
         m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
@@ -246,14 +239,39 @@ def update(frame):
         t = Affine2D().scale(0)
         m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
     scat17.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+    
+    if 'social' in xdf_file:
+        if spot_subj2_los[frame]:
+            t = Affine2D().scale(4)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        else:
+            t = Affine2D().scale(0)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        scat16.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
-    if go1_subj2_los[frame]:
-        t = Affine2D().scale(4)
-        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        if go1_subj2_los[frame]:
+            t = Affine2D().scale(4)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        else:
+            t = Affine2D().scale(0)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        scat18.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     else:
-        t = Affine2D().scale(0)
-        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
-    scat18.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+        if spot_subj2_los[frame]:
+            t = Affine2D().scale(4).rotate_deg(-40)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        else:
+            t = Affine2D().scale(0).rotate_deg(-40)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        scat16.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+        if go1_subj2_los[frame]:
+            t = Affine2D().scale(4).rotate_deg(-40)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        else:
+            t = Affine2D().scale(0).rotate_deg(-40)
+            m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+        scat18.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
 
     return (scat1) # (line1, line2, line3, line4, line5, line6)
@@ -294,7 +312,7 @@ if 'social' in xdf_file:
     subj2_pos = [6.75,3.2]
     t = Affine2D().scale(2)
     m = MarkerStyle("^", transform=t)
-    sub1.scatter(5.75, 3.2, c='#008000', marker=m)
+    sub1.scatter(5.75, 3.2, c='#008000', marker=m, label="Human Participant")
     sub1.scatter(6.75, 3.2, c='#008000', marker=m)
 else:
     subj1_pos = [5.75, 3.2]
@@ -601,8 +619,8 @@ go1_subj1_los = np.zeros(go1_series.shape[0])
 go1_subj2_los = np.zeros(go1_series.shape[0])
 
 # Points of the polygon
-polygon_livroom = [ Point(0,1), Point(0,6), Point(14,6), Point(10,3),  Point(5,1)]
-polygon_smallroom = [  Point(9,1), Point(12,0), Point(13,0), Point(14,7)]
+polygon_livroom = [ Point(1,1), Point(1,6), Point(14,6), Point(10,3),  Point(5,1)]
+polygon_smallroom = [  Point(10,1), Point(12,0), Point(14,0), Point(14,7)]
 
 if 'social' in xdf_file:
     for i in range(spot_series.shape[0]):
@@ -645,9 +663,9 @@ if 'social' in xdf_file:
     m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
     scat16 = sub1.scatter(subj2_pos[0]-0.3, subj2_pos[1], c='#0000FF', marker=m)
 else:
-    t = Affine2D().scale(4)
+    t = Affine2D().scale(4).rotate_deg(-40)
     m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
-    scat16 = sub1.scatter(subj2_pos[0]+0.1, subj2_pos[1]-0.3, c='#0000FF', marker=m)
+    scat16 = sub1.scatter(subj2_pos[0]-0.2, subj2_pos[1]+0.25, c='#0000FF', marker=m)
 ## Scatter plots for the Go1 Line of Sight Booleans
 t = Affine2D().scale(4)
 m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
@@ -657,13 +675,16 @@ if 'social' in xdf_file:
     m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
     scat18 = sub1.scatter(subj2_pos[0]+0.1, subj2_pos[1], c='#FF0000', marker=m)
 else:
-    t = Affine2D().scale(4)
+    t = Affine2D().scale(4).rotate_deg(-40)
     m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
-    scat18 = sub1.scatter(subj2_pos[0]+0.4, subj2_pos[1]-0.3, c='#FF0000', marker=m)
+    scat18 = sub1.scatter(subj2_pos[0]+0.1, subj2_pos[1]-0.15, c='#FF0000', marker=m)
 ## Finally add the legend for top plot
 sub1.legend(labelcolor='linecolor', loc='upper left')
+
+input("Press Enter to continue...")
 
 ## Run the animation
 ani = animation.FuncAnimation(fig=fig, func=update, interval=1) ## interval=1 speeds up the animation
 plt.show()
+
 
