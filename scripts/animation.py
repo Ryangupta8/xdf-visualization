@@ -619,35 +619,46 @@ go1_subj1_los = np.zeros(go1_series.shape[0])
 go1_subj2_los = np.zeros(go1_series.shape[0])
 
 # Points of the polygon
-polygon_livroom = [ Point(1,1), Point(1,6), Point(14,6), Point(10,3),  Point(5,1)]
+polygon_livroom1 = [ Point(1,7), Point(1,2), Point(5,2), Point(5,7)]
+polygon_livroom2 = [ Point(1,4), Point(1,7), Point(14,7), Point(14,4)]
 polygon_smallroom = [  Point(10,1), Point(12,0), Point(14,0), Point(14,7)]
 
 if 'social' in xdf_file:
     for i in range(spot_series.shape[0]):
         p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
-        n = 5
-        if(checkInside(polygon_livroom, n, p)):
+        n = 4
+        if checkInside(polygon_livroom1, n, p):
+            spot_subj1_los[i] = 1
+            spot_subj2_los[i] = 1
+        elif checkInside(polygon_livroom2, n, p):
             spot_subj1_los[i] = 1
             spot_subj2_los[i] = 1
     for i in range(go1_series.shape[0]):
         p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
-        n = 5
-        if(checkInside(polygon_livroom, n, p)):
+        n = 4
+        if checkInside(polygon_livroom1, n, p):
+            go1_subj1_los[i] = 1
+            go1_subj2_los[i] = 1
+        elif checkInside(polygon_livroom2, n, p):
             go1_subj1_los[i] = 1
             go1_subj2_los[i] = 1
 else:
     for i in range(spot_series.shape[0]):
         p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
-        n = 5
-        if(checkInside(polygon_livroom, n, p)):
+        n = 4
+        if checkInside(polygon_livroom1, n, p):
+            spot_subj1_los[i] = 1
+        elif checkInside(polygon_livroom2, n, p):
             spot_subj1_los[i] = 1
         n = 4
         if(checkInside(polygon_smallroom, n, p)):
             spot_subj2_los[i] = 1
     for i in range(go1_series.shape[0]):
         p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
-        n = 5
-        if(checkInside(polygon_livroom, n, p)):
+        n = 4
+        if checkInside(polygon_livroom1, n, p):
+            go1_subj1_los[i] = 1
+        elif checkInside(polygon_livroom2, n, p):
             go1_subj1_los[i] = 1
         n = 4
         if(checkInside(polygon_smallroom, n, p)):
