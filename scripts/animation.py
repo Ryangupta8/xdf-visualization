@@ -123,17 +123,17 @@ def update(frame):
     sub5.set_xlim(scgzfa_stream['time_stamps'][0], scgzfa_stream['time_stamps'][0] + frame / 14.5)
 
     # update the audio signal smallroom
-    data = np.stack([9.2, 1.5]).T
+    data = np.stack([9.55, 1.6]).T
     scat14.set_offsets(data)
-    t = Affine2D().scale(800*smallroom_series[int(frame*smallroom_srate/state_srate)])
-    m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+    t = Affine2D().scale(400*smallroom_series[int(frame*smallroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((-int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2), -int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2)), "o"), transform=t)
     scat14.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
 
     # update the audio signal livroom
-    data = np.stack([4.25, 3.15]).T
+    data = np.stack([4.775, 3.15]).T
     scat13.set_offsets(data)
-    t = Affine2D().scale(1600*livroom_series[int(frame*livroom_srate/state_srate)])
-    m = MarkerStyle(TextPath((0, 0), "."), transform=t)
+    t = Affine2D().scale(400*livroom_series[int(frame*livroom_srate/state_srate)])
+    m = MarkerStyle(TextPath((-int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2), -int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2)), "o"), transform=t)
     scat13.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     
     return (scat1) # (line1, line2, line3, line4, line5, line6)
