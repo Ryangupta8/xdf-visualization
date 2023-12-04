@@ -14,6 +14,93 @@ import math
 sys.path.append('data')
 sys.path.append('map')
 
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+ 
+class line:
+    def __init__(self, p1, p2):
+        self.p1 = p1
+        self.p2 = p2
+ 
+def onLine(l1, p):
+    # Check whether p is on the line or not
+    if (
+        p.x <= max(l1.p1.x, l1.p2.x)
+        and p.x >= min(l1.p1.x, l1.p2.x)
+        and (p.y <= max(l1.p1.y, l1.p2.y) and p.y >= min(l1.p1.y, l1.p2.y))
+    ):
+        return True
+    return False
+ 
+def direction(a, b, c):
+    val = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y)
+    if val == 0:
+        # Collinear
+        return 0
+    elif val < 0:
+        # Anti-clockwise direction
+        return 2
+    # Clockwise direction
+    return 1
+ 
+def isIntersect(l1, l2):
+    # Four direction for two lines and points of other line
+    dir1 = direction(l1.p1, l1.p2, l2.p1)
+    dir2 = direction(l1.p1, l1.p2, l2.p2)
+    dir3 = direction(l2.p1, l2.p2, l1.p1)
+    dir4 = direction(l2.p1, l2.p2, l1.p2)
+ 
+    # When intersecting
+    if dir1 != dir2 and dir3 != dir4:
+        return True
+ 
+    # When p2 of line2 are on the line1
+    if dir1 == 0 and onLine(l1, l2.p1):
+        return True
+ 
+    # When p1 of line2 are on the line1
+    if dir2 == 0 and onLine(l1, l2.p2):
+        return True
+ 
+    # When p2 of line1 are on the line2
+    if dir3 == 0 and onLine(l2, l1.p1):
+        return True
+ 
+    # When p1 of line1 are on the line2
+    if dir4 == 0 and onLine(l2, l1.p2):
+        return True
+ 
+    return False
+ 
+def checkInside(poly, n, p):
+    # When polygon has less than 3 edge, it is not polygon
+    if n < 3:
+        return False
+ 
+    # Create a point at infinity, y is same as point p
+    exline = line(p, Point(9999, p.y))
+    count = 0
+    i = 0
+    while True:
+        # Forming a line from two consecutive points of poly
+        side = line(poly[i], poly[(i + 1) % n])
+        if isIntersect(side, exline):
+            # If side is intersects ex
+            if (direction(side.p1, p, side.p2) == 0):
+                return onLine(side, p)
+            count += 1
+         
+        i = (i + 1) % n
+        if i == 0:
+            break
+ 
+    # When count is odd
+    return count & 1
+
+
 def rot(x):
     # r = np.array([[-1,0],[0,-1]])
     r = np.array([[1,0],[0,1]])
@@ -123,7 +210,7 @@ def update(frame):
     sub5.set_xlim(scgzfa_stream['time_stamps'][0], scgzfa_stream['time_stamps'][0] + frame / 14.5)
 
     # update the audio signal smallroom
-    data = np.stack([9.55, 1.6]).T
+    data = np.stack([9.45, 1.6]).T
     scat14.set_offsets(data)
     t = Affine2D().scale(400*smallroom_series[int(frame*smallroom_srate/state_srate)])
     m = MarkerStyle(TextPath((-int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2), -int((400*smallroom_series[int(frame*smallroom_srate/state_srate)])/2)), "o"), transform=t)
@@ -135,11 +222,44 @@ def update(frame):
     t = Affine2D().scale(400*livroom_series[int(frame*livroom_srate/state_srate)])
     m = MarkerStyle(TextPath((-int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2), -int((400*livroom_series[int(frame*livroom_srate/state_srate)])/2)), "o"), transform=t)
     scat13.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+    if spot_subj1_los[frame]:
+        t = Affine2D().scale(4)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    else:
+        t = Affine2D().scale(0)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat15.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
     
+    if spot_subj2_los[frame]:
+        t = Affine2D().scale(4)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    else:
+        t = Affine2D().scale(0)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat16.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+    if go1_subj1_los[frame]:
+        t = Affine2D().scale(4)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    else:
+        t = Affine2D().scale(0)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat17.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+    if go1_subj2_los[frame]:
+        t = Affine2D().scale(4)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    else:
+        t = Affine2D().scale(0)
+        m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat18.set_paths([MarkerStyle(m).get_path().transformed(MarkerStyle(m).get_transform())])
+
+
     return (scat1) # (line1, line2, line3, line4, line5, line6)
 
 ## Load the xdf file
-# xdf_file = 'session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
+# xdf_file = 'session1/session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
 xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
 data, header = pyxdf.load_xdf('data/' + xdf_file)
 
@@ -170,11 +290,15 @@ sub5.set_yticks([])
 plot_vectormap(vectormap_txt, fig, sub1)
 
 if 'social' in xdf_file:
+    subj1_pos = [5.75, 3.2]
+    subj2_pos = [6.75,3.2]
     t = Affine2D().scale(2)
     m = MarkerStyle("^", transform=t)
     sub1.scatter(5.75, 3.2, c='#008000', marker=m)
     sub1.scatter(6.75, 3.2, c='#008000', marker=m)
 else:
+    subj1_pos = [5.75, 3.2]
+    subj2_pos = [10.0, 1.2]
     t = Affine2D().scale(2)
     m = MarkerStyle("^", transform=t)
     sub1.scatter(5.75, 3.2, c='#008000', marker=m)
@@ -211,8 +335,8 @@ for stream in data:
             print('-----------------------')
             ## The actual data points
             spot_series = stream['time_series']
-            
-
+            spot_stream = stream
+        
             _yaw = math.atan2(2.0 * (spot_series[0,5] * spot_series[0,4]), spot_series[0,5] * spot_series[0,5] - spot_series[0,4] * spot_series[0,4])
             # print("yaw = ", _yaw)
             # print("np.rad2deg(_yaw) = ",np.rad2deg(_yaw))
@@ -238,6 +362,7 @@ for stream in data:
 
             ## The actual data points
             go1_series = stream['time_series']
+            go1_stream = stream
 
             _yaw = math.atan2(2.0 * (go1_series[0,5] * go1_series[0,4]), go1_series[0,5] * go1_series[0,5] - go1_series[0,4] * go1_series[0,4])
             # print("yaw = ", _yaw)
@@ -439,7 +564,106 @@ for stream in data:
     else:
         raise RuntimeError('Unknown stream format')
 
+
+## Determine if robot is moving
+spot_moving = np.zeros(spot_series.shape[0])
+go1_moving = np.zeros(go1_series.shape[0])
+
+for i in range(spot_series.shape[0]-20):
+    
+    _yaw1 = math.atan2(2.0 * (spot_series[i+20,5] * spot_series[i+20,4]), spot_series[i+20,5] * spot_series[i+20,5] - spot_series[i+20,4] * spot_series[i+20,4])
+
+    _yaw0 = math.atan2(2.0 * (spot_series[i,5] * spot_series[i,4]), spot_series[i,5] * spot_series[i,5] - spot_series[i,4] * spot_series[i,4])
+
+    ## if position is changing
+    if np.sqrt((spot_series[i+20,0] - spot_series[i,0])**2) + np.sqrt((spot_series[i+20,1] - spot_series[i,1])**2) > 0.075:
+        spot_moving[i+20] = 1
+    ## if yaw is changing
+    elif abs(_yaw1 - _yaw0) > 0.1:
+        spot_moving[i+20] = 1
+
+for i in range(go1_series.shape[0]-20):
+    _yaw1 = math.atan2(2.0 * (go1_series[i+20,5] * go1_series[i+20,4]), go1_series[i+20,5] * go1_series[i+20,5] - go1_series[i+20,4] * go1_series[i+20,4])
+
+    _yaw0 = math.atan2(2.0 * (go1_series[i,5] * go1_series[i,4]), go1_series[i,5] * go1_series[i,5] - go1_series[i,4] * go1_series[i,4])
+
+    ## if position is changing
+    if np.sqrt((go1_series[i+20,0] - go1_series[i,0])**2) + np.sqrt((go1_series[i+20,1] - go1_series[i,1])**2) > 0.075:
+        go1_moving[i+20] = 1
+    ## if yaw is changing
+    elif abs(_yaw1 - _yaw0) > 0.1:
+        go1_moving[i+20] = 1
+
+## Determine if robot is in line of sight
+spot_subj1_los = np.zeros(spot_series.shape[0])
+spot_subj2_los = np.zeros(spot_series.shape[0])
+go1_subj1_los = np.zeros(go1_series.shape[0])
+go1_subj2_los = np.zeros(go1_series.shape[0])
+
+# Points of the polygon
+polygon_livroom = [ Point(0,1), Point(0,6), Point(14,6), Point(10,3),  Point(5,1)]
+polygon_smallroom = [  Point(9,1), Point(12,0), Point(13,0), Point(14,7)]
+
+if 'social' in xdf_file:
+    for i in range(spot_series.shape[0]):
+        p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            spot_subj1_los[i] = 1
+            spot_subj2_los[i] = 1
+    for i in range(go1_series.shape[0]):
+        p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            go1_subj1_los[i] = 1
+            go1_subj2_los[i] = 1
+else:
+    for i in range(spot_series.shape[0]):
+        p = Point(int(spot_series[i,0]),int(spot_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            spot_subj1_los[i] = 1
+        n = 4
+        if(checkInside(polygon_smallroom, n, p)):
+            spot_subj2_los[i] = 1
+    for i in range(go1_series.shape[0]):
+        p = Point(int(go1_series[i,0]),int(go1_series[i,1]))
+        n = 5
+        if(checkInside(polygon_livroom, n, p)):
+            go1_subj1_los[i] = 1
+        n = 4
+        if(checkInside(polygon_smallroom, n, p)):
+            go1_subj2_los[i] = 1
+
+
+## Scatter plots for the Spot Line of Sight Booleans
+t = Affine2D().scale(4)
+m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+scat15 = sub1.scatter(subj1_pos[0]-0.3, subj1_pos[1], c='#0000FF', marker=m, label='Spot Line of Sight of Participant')
+if 'social' in xdf_file:
+    t = Affine2D().scale(4)
+    m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat16 = sub1.scatter(subj2_pos[0]-0.3, subj2_pos[1], c='#0000FF', marker=m)
+else:
+    t = Affine2D().scale(4)
+    m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat16 = sub1.scatter(subj2_pos[0]+0.1, subj2_pos[1]-0.3, c='#0000FF', marker=m)
+## Scatter plots for the Go1 Line of Sight Booleans
+t = Affine2D().scale(4)
+m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+scat17 = sub1.scatter(subj1_pos[0]+0.1, subj1_pos[1], c='#FF0000', marker=m, label='Go1 Line of Sight of Participant')
+if 'social' in xdf_file:
+    t = Affine2D().scale(4)
+    m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat18 = sub1.scatter(subj2_pos[0]+0.1, subj2_pos[1], c='#FF0000', marker=m)
+else:
+    t = Affine2D().scale(4)
+    m = MarkerStyle(TextPath((0, 0), "!"), transform=t)
+    scat18 = sub1.scatter(subj2_pos[0]+0.4, subj2_pos[1]-0.3, c='#FF0000', marker=m)
+## Finally add the legend for top plot
 sub1.legend(labelcolor='linecolor', loc='upper left')
+
+## Run the animation
 ani = animation.FuncAnimation(fig=fig, func=update, interval=1) ## interval=1 speeds up the animation
 plt.show()
 
