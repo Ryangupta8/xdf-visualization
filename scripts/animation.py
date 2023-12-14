@@ -131,6 +131,11 @@ def plot_vectormap(fname,figure,axes,facecolor="white",linecolor="black"):
 
 ## Update function for the matplotlib animation
 def update(frame):
+    global first
+    if first:
+        input("Press Enter to continue...")
+        first = False
+
     # update the spot state plots:
     data = np.stack([spot_series[frame,0], spot_series[frame,1]]).T
     scat1.set_offsets(data)
@@ -278,8 +283,12 @@ def update(frame):
 
 ## Load the xdf file
 # xdf_file = 'session1/session1-trial8-isolated-P0livroom-P1smallroom-together-search.xdf'
-xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
+# xdf_file = 'session1/session1-trial2-social-separated-search.xdf'
+xdf_file = 'session5/session5-trial6-isolated-P8smallroom-P7livroom-separate-navigation.xdf'
 data, header = pyxdf.load_xdf('data/' + xdf_file)
+
+global first
+first = True
 
 ## Create the figure
 fig = plt.figure(figsize=(4,6))
@@ -692,7 +701,6 @@ else:
 ## Finally add the legend for top plot
 sub1.legend(labelcolor='linecolor', loc='upper left')
 
-input("Press Enter to continue...")
 
 ## Run the animation
 ani = animation.FuncAnimation(fig=fig, func=update, interval=1) ## interval=1 speeds up the animation
